@@ -1,11 +1,129 @@
-import Head from 'next/head'
-import Image from 'next/image'
-import { Inter } from 'next/font/google'
-import styles from '@/styles/Home.module.css'
+import Head from "next/head";
+import Image from "next/image";
+import { Inter } from "next/font/google";
+// import { Dropdown, Options } from "@/components/Dropdown";
+import { Combobox } from "@/components/Combobox";
 
-const inter = Inter({ subsets: ['latin'] })
+import { Options } from "@/components/Combobox.d";
+
+const inter = Inter({ subsets: ["latin"] });
+
+// import { Option } from "@/components/Dropdown";
+import { useState } from "react";
+
+type Value = {
+  title: string;
+  id: string; // example: this is unique so it can be used as a key
+};
 
 export default function Home() {
+  const [selected, setSelected] = useState<Options<Value>>([]);
+  const handleChange = (selected: Options<Value>) => {
+    setSelected(selected);
+  };
+
+  const options: Options<Value> = [
+    {
+      value: { title: "North America", id: "continent_NA" },
+      name: "North America",
+      options: [
+        {
+          value: { title: "United States", id: "country_US" },
+          name: "United States",
+          options: [
+            {
+              value: { title: "New York", id: "city_NewYork" },
+              name: "New York",
+              options: [
+                {
+                  value: { title: "Manhattan", id: "district_Manhattan" },
+                  name: "Manhattan",
+                },
+                {
+                  value: { title: "Brooklyn", id: "district_Brooklyn" },
+                  name: "Brooklyn",
+                },
+              ],
+            },
+            {
+              value: { title: "Los Angeles", id: "city_LosAngeles" },
+              name: "Los Angeles",
+              options: [
+                {
+                  value: { title: "Hollywood", id: "district_Hollywood" },
+                  name: "Hollywood",
+                },
+                {
+                  value: {
+                    title: "Beverly Hills",
+                    id: "district_BeverlyHills",
+                  },
+                  name: "Beverly Hills",
+                },
+              ],
+            },
+          ],
+        },
+        {
+          value: { title: "Canada", id: "country_Canada" },
+          name: "Canada",
+          options: [
+            {
+              value: { title: "Toronto", id: "city_Toronto" },
+              name: "Toronto",
+            },
+            {
+              value: { title: "Vancouver", id: "city_Vancouver" },
+              name: "Vancouver",
+            },
+          ],
+        },
+      ],
+    },
+    {
+      value: { title: "Europe", id: "continent_EU" },
+      name: "Europe",
+      options: [
+        {
+          value: { title: "Germany", id: "country_Germany" },
+          name: "Germany",
+          options: [
+            {
+              value: { title: "Berlin", id: "city_Berlin" },
+              name: "Berlin",
+            },
+            {
+              value: { title: "Munich", id: "city_Munich" },
+              name: "Munich",
+            },
+          ],
+        },
+        {
+          value: { title: "France", id: "country_France" },
+          name: "France",
+          options: [
+            {
+              value: { title: "Paris", id: "city_Paris" },
+              name: "Paris",
+            },
+            {
+              value: { title: "Lyon", id: "city_Lyon" },
+              name: "Lyon",
+            },
+          ],
+        },
+      ],
+    },
+    {
+      value: { title: "Asia", id: "continent_Asia" },
+      name: "Asia",
+    },
+    {
+      value: { title: "Africa", id: "continent_Africa" },
+      name: "Africa",
+    },
+  ];
+
   return (
     <>
       <Head>
@@ -14,110 +132,51 @@ export default function Home() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className={styles.main}>
-        <div className={styles.description}>
-          <p>
-            Get started by editing&nbsp;
-            <code className={styles.code}>src/pages/index.tsx</code>
-          </p>
-          <div>
-            <a
-              href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              By{' '}
-              <Image
-                src="/vercel.svg"
-                alt="Vercel Logo"
-                className={styles.vercelLogo}
-                width={100}
-                height={24}
-                priority
-              />
-            </a>
+      <main>
+        <div className="flex flex-col gap-8">
+          <div className="flex flex-col">
+            All of them together
+            <Combobox
+              options={options}
+              value={selected}
+              by="id"
+              onChange={handleChange}
+              placeholder="Select..."
+              narrow
+            />
           </div>
-        </div>
-
-        <div className={styles.center}>
-          <Image
-            className={styles.logo}
-            src="/next.svg"
-            alt="Next.js Logo"
-            width={180}
-            height={37}
-            priority
-          />
-          <div className={styles.thirteen}>
-            <Image
-              src="/thirteen.svg"
-              alt="13"
-              width={40}
-              height={31}
-              priority
+          <div className="flex flex-col">
+            Sorted
+            <Combobox
+              options={options}
+              value={selected}
+              by="id"
+              onChange={handleChange}
+              placeholder="Select..."
+              sort
+            />
+          </div>
+          <div className="flex flex-col">
+            Narrowed selection
+            <Combobox
+              options={options}
+              value={selected}
+              by="id"
+              onChange={handleChange}
+              placeholder="Select..."
+              sort
             />
           </div>
         </div>
-
-        <div className={styles.grid}>
-          <a
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <h2 className={inter.className}>
-              Docs <span>-&gt;</span>
-            </h2>
-            <p className={inter.className}>
-              Find in-depth information about Next.js features and&nbsp;API.
-            </p>
-          </a>
-
-          <a
-            href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <h2 className={inter.className}>
-              Learn <span>-&gt;</span>
-            </h2>
-            <p className={inter.className}>
-              Learn about Next.js in an interactive course with&nbsp;quizzes!
-            </p>
-          </a>
-
-          <a
-            href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <h2 className={inter.className}>
-              Templates <span>-&gt;</span>
-            </h2>
-            <p className={inter.className}>
-              Discover and deploy boilerplate example Next.js&nbsp;projects.
-            </p>
-          </a>
-
-          <a
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <h2 className={inter.className}>
-              Deploy <span>-&gt;</span>
-            </h2>
-            <p className={inter.className}>
-              Instantly deploy your Next.js site to a shareable URL
-              with&nbsp;Vercel.
-            </p>
-          </a>
-        </div>
+        {/* <button
+          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+          onClick={() => {
+            console.log(selected);
+          }}
+        >
+          {"Log selected options"}
+        </button> */}
       </main>
     </>
-  )
+  );
 }
