@@ -1,8 +1,10 @@
+import { BlobOptions } from "buffer";
 import { useCallback, useMemo } from "react";
 import { Option, Options } from "./Combobox.d";
 
 interface Props<T> {
-  value: Option<T>[];
+  value: Options<T>;
+  options: Options<T>;
   narrow?: boolean;
   cmp: (a: Option<T>, b: Option<T>) => boolean;
   handleChange: (value: Options<T>) => void;
@@ -10,25 +12,48 @@ interface Props<T> {
 
 export const useStrategy = <T extends unknown>({
   value,
+  options,
   narrow,
   cmp,
   handleChange,
 }: Props<T>) => {
-  const isSelectedDefault = useCallback(
-    (option: Option<T>): boolean => {
+  const getLeafs = useCallback((options: Options<T>) => {
+    return options.reduce((acc: Options<T>, option) => {
       if (option.options) {
-        return option.options.every((option) => isSelectedDefault(option));
+        acc.push(...getLeafs(option.options));
+      } else {
+        acc.push(option);
       }
-      return value.some((item) => cmp(item, option));
+      return acc;
+    }, []);
+  }, []);
+
+  const isSelected_ = useCallback(
+    (option: Option<T>, selected: Options<T> = value): boolean => {
+      if (option.options) {
+        return option.options.every((option) => isSelected_(option, selected));
+      }
+      return selected.some((item) => cmp(item, option));
     },
     [value, cmp]
   );
 
-  const addOptionDefault = useCallback(
-    (option: Option<T>) => {
-      let next = [...value];
+  const isSelected = useMemo(() => {
+    if (narrow) {
+      return (option: Option<T>) => {
+        const leafs = getLeafs(value);
+        return isSelected_(option, leafs);
+      };
+    } else {
+      return isSelected_;
+    }
+  }, [isSelected_, getLeafs, narrow, value]);
+
+  const addOption_ = useCallback(
+    (option: Option<T>, selected: Options<T> = value) => {
+      let next = [...selected];
       const transform = (option: Option<T>) => {
-        if (isSelectedDefault(option)) {
+        if (isSelected(option, selected)) {
           return;
         }
         if (option.options) {
@@ -38,16 +63,16 @@ export const useStrategy = <T extends unknown>({
         }
       };
       transform(option);
-      handleChange(next);
+      return next;
     },
-    [isSelectedDefault, handleChange, value]
+    [isSelected, value]
   );
 
-  const removeOptionDefault = useCallback(
-    (option: Option<T>) => {
-      let next = [...value];
+  const removeOption_ = useCallback(
+    (option: Option<T>, selected: Options<T> = value) => {
+      let next = [...selected];
       const transform = (option: Option<T>) => {
-        if (!isSelectedDefault(option)) {
+        if (!isSelected(option)) {
           return;
         }
         if (option.options) {
@@ -56,49 +81,54 @@ export const useStrategy = <T extends unknown>({
         next = next.filter((item) => !cmp(item, option));
       };
       transform(option);
-      handleChange(next);
+      return next;
     },
-    [isSelectedDefault, handleChange, value, cmp]
+    [isSelected, cmp, value]
   );
 
-  //   const valueLeafs = useMemo(() => {
-  //     if (!narrow) {
-  //       return value;
-  //     } else {
-  //       return options.reduce((acc: Options<T>, option) => {
-  //         if (option.options) {
-  //           acc.push(...getChildren(option.options));
-  //         } else {
-  //           acc.push(option);
-  //         }
-  //         return acc;
-  //       }, []);
-  //     }
-  //   }, [value, narrow, options]);
+  const narrowSelected = useCallback(
+    (selected: Options<T>) => {
+      const transform = (options: Options<T>): Options<T> => {
+        return options.flatMap((option) => {
+          if (isSelected_(option, selected)) {
+            return [option];
+          }
+          if (option.options) {
+            return transform(option.options);
+          }
+          return [];
+        });
+      };
+      return transform(options);
+    },
+    [options, isSelected_]
+  );
 
   const addOption = useMemo(() => {
     if (narrow) {
-      return addOptionNarrow;
+      return (option: Option<T>) => {
+        const leafs = getLeafs(value);
+        const next = addOption_(option, leafs);
+        const narrowed = narrowSelected(next);
+        handleChange(narrowed);
+      };
     } else {
-      return addOptionDefault;
+      return addOption_;
     }
-  }, [addOptionDefault, addOptionNarrow, narrow]);
+  }, [addOption_, handleChange, narrowSelected, getLeafs, narrow, value]);
 
   const removeOption = useMemo(() => {
     if (narrow) {
-      return removeOptionDefault;
+      return (option: Option<T>) => {
+        const leafs = getLeafs(value);
+        const next = removeOption_(option, leafs);
+        const narrowed = narrowSelected(next);
+        handleChange(narrowed);
+      };
     } else {
-      return removeOptionDefault;
+      return removeOption_;
     }
-  }, [removeOptionDefault, narrow]);
-
-  const isSelected = useMemo(() => {
-    if (narrow) {
-      return isSelectedDefault;
-    } else {
-      return isSelectedDefault;
-    }
-  }, [isSelectedDefault, narrow]);
+  }, [removeOption_, handleChange, narrowSelected, getLeafs, narrow, value]);
 
   const selectOption = useCallback(
     (option: Option<T>) => {

@@ -21,7 +21,7 @@ export const Option = (props: Props) => {
       aria-selected={props.selected}
       className={optionClasses}
       onClick={(e) => {
-        e.preventDefault();
+        // e.preventDefault();
         e.stopPropagation();
         props.onClick();
       }}

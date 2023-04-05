@@ -175,6 +175,7 @@ export const Combobox = <T extends unknown>({
 
   const { isSelected, selectOption } = useStrategy({
     value,
+    options,
     narrow,
     cmp,
     handleChange,
@@ -199,19 +200,15 @@ export const Combobox = <T extends unknown>({
         {value.map((option, index) => (
           <Tag key={index} label={option.name} remove={() => {}}></Tag>
         ))}
-        <input
-          type="text"
+        <Input
           value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          onChange={setSearchTerm}
           placeholder={placeholder}
-          ref={inputRef}
-          autoComplete="off"
-          aria-autocomplete="list"
-          aria-activedescendant={
+          activeDescendant={
             focusIndex >= 0 ? `option-${id}-${focusIndex}` : undefined
           }
-          className="text-gray-700 flex-grow focus:outline-none"
-        />
+          ref={inputRef}
+        ></Input>
       </div>
       <Dropdown
         id={id}

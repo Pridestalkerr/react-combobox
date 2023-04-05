@@ -1,37 +1,27 @@
-import { FC, HTMLAttributes } from "react";
+import { Ref, forwardRef } from "react";
 
 interface Props {
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
+  activeDescendant: string | undefined;
 }
 
-export const Input: FC<Props & HTMLAttributes<HTMLInputElement>> = ({
-  value,
-  onChange,
-  placeholder,
-  ...rest
-}) => {
+export const Input = forwardRef(function Input(
+  { value, onChange, placeholder, activeDescendant }: Props,
+  inputRef: Ref<HTMLInputElement>
+) {
   return (
     <input
       type="text"
       value={value}
-      // autoComplete="off"
-      // aria-autocomplete="list"
-      // aria-controls={listboxId}
-      // aria-activedescendant={
-      //   focusIndex >= 0 ? `option-${id}-${focusIndex}` : undefined
-      // }
-      //   readOnly={!search}
-      placeholder={placeholder}
       onChange={(e) => onChange(e.target.value)}
+      placeholder={placeholder}
+      ref={inputRef}
+      autoComplete="off"
+      aria-autocomplete="list"
+      aria-activedescendant={activeDescendant}
       className="text-gray-700 flex-grow focus:outline-none"
-      {...rest}
-      //   onClick={(e) => {
-      //     if (isOpen) {
-      //       e.stopPropagation();
-      //     }
-      //   }}
     />
   );
-};
+});
