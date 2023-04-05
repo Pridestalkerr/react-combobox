@@ -166,18 +166,6 @@ export const Combobox = <T extends unknown>({
     }
   }, [by]);
 
-  const { isSelected } = useStrategy({ value, narrow, cmp });
-
-  // const isSelected = useCallback(
-  //   (option: Option<T>): boolean => {
-  //     if (option.options) {
-  //       return option.options.every((option) => isSelected(option));
-  //     }
-  //     return value.some((item) => cmp(item, option));
-  //   },
-  //   [value, cmp]
-  // );
-
   const handleChange = useCallback(
     (options: Options<T>) => {
       onChange(options);
@@ -185,68 +173,12 @@ export const Combobox = <T extends unknown>({
     [onChange]
   );
 
-  const addOption = useCallback(
-    (option: Option<T>) => {
-      let next = [...value];
-      const transform = (option: Option<T>) => {
-        if (isSelected(option)) {
-          return;
-        }
-        if (option.options) {
-          option.options.forEach(transform);
-        } else {
-          next.push(option);
-        }
-      };
-      transform(option);
-      handleChange(next);
-    },
-    [isSelected, handleChange, value]
-  );
-
-  const addOptionNarrow = useCallback(
-    (option: Option<T>) => {
-      let next = value.filter(
-        (item) => !flattenOptions([option]).some((child) => cmp(item, child))
-      );
-      next.push(option);
-      handleChange(next);
-    },
-    [flattenOptions, handleChange, value, cmp]
-  );
-
-  const removeOption = useCallback(
-    (option: Option<T>) => {
-      let next = [...value];
-      const transform = (option: Option<T>) => {
-        if (!isSelected(option)) {
-          return;
-        }
-        if (option.options) {
-          option.options.forEach(transform);
-        }
-        next = next.filter((item) => !cmp(item, option));
-      };
-      transform(option);
-      handleChange(next);
-    },
-    [isSelected, handleChange, value, cmp]
-  );
-
-  const selectOption = useCallback(
-    (option: Option<T>) => {
-      if (isSelected(option)) {
-        removeOption(option);
-      } else {
-        // if (narrow) {
-        //   return addOptionNarrow(option);
-        // }
-        // alert("milsugi");
-        addOption(option);
-      }
-    },
-    [isSelected, addOption, removeOption]
-  );
+  const { isSelected, selectOption } = useStrategy({
+    value,
+    narrow,
+    cmp,
+    handleChange,
+  });
 
   return (
     <div
